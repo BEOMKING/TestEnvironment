@@ -33,3 +33,27 @@ class MemberTest {
     }
 }
 ```
+
+#### SpringTest에서 Container 정보 사용하기
+```java
+@SpringBootTest
+@Testcontainers
+// Spring Test Context에서 사용할 Envrionment를 initialize에 등록한다.
+@ContextConfiguration(initializers = SpringTestSupport.ContainerPropertyInitializer.class)
+public class SpringTestSupport {
+    @Container
+    private static final PostgreSQLContainer postgreSQLContainer = new PostgreSQLContainer()
+            .withDatabaseName("test");
+
+    @Autowired
+    protected Environment environment;
+    // ApplicationContext를 초기화할 때 사용하는 CallBack 인터페이스를 구현한다.
+    static class ContainerPropertyInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+        @Override
+        public void initialize(ConfigurableApplicationContext applicationContext) {
+            TestPropertyValues.of("container.port=" + postgreSQLContainer.getMappedPort(5432)).
+                    applyTo(applicationContext.getEnvironment());
+        }
+    }
+}
+```
