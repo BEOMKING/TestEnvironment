@@ -2,6 +2,8 @@ spring:
   datasource:
     hikari:
       jdbc-url: jdbc:tc:postgresql:///test
+      username: postgres
+      password: postgres
       driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
   jpa:
     hibernate:

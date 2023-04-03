@@ -34,6 +34,18 @@ class MemberTest {
 }
 ```
 
+```yaml
+spring:
+  datasource:
+    hikari:
+      ## Test Container에서 사용할 JDBC URL을 설정한다.
+      jdbc-url: jdbc:tc:postgresql:///test
+      username: postgres
+      password: postgres
+      ## Test Container에서 사용할 JDBC 드라이버를 설정한다.
+      driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+```
+
 #### SpringTest에서 Container 정보 사용하기
 ```java
 @SpringBootTest
@@ -56,4 +68,47 @@ public class SpringTestSupport {
         }
     }
 }
+```
+
+
+#### Docker Compose 사용 예제
+```yaml
+# docker-compose.yml
+version: "1"
+
+services:
+  postgresql:
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: test
+```
+
+```java
+@SpringBootTest
+@Testcontainers
+class MemberTest {
+    @Autowired
+    private MemberRepository memberRepository;
+    // Local Compose 옵션을 주어야 Local에 설치된 Docker를 이용해 Docker Compose를 사용한다.
+    @Container
+    private static final DockerComposeContainer dockerComposeContainer = new DockerComposeContainer(
+            new File("src/test/resources/docker-compose.yml")
+    ).withLocalCompose(true);
+}
+```
+
+```yaml
+spring:
+  datasource:
+    hikari:
+      ## Test Container에서 사용할 JDBC URL을 설정한다.
+      jdbc-url: jdbc:tc:postgresql:///test
+      username: postgres
+      password: postgres
+      ## Test Container에서 사용할 JDBC 드라이버를 설정한다.
+      driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
 ```
